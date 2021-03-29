@@ -6,20 +6,24 @@
 #include <stdlib.h>
 
 int run();
+
 int main() {
+    setbuf(stdout, NULL); //set this to let the output in order
     run();
 }
 
-int run(){
+int run() {
+    printf("start set up socket server");
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if(server_fd<0){
+    if (server_fd < 0) {
         perror("cannot create socket");
         exit(EXIT_FAILURE);
     }
+    printf("socket created\n");
 
     struct sockaddr_in address;
 //    memset(&address.sin_zero, '\0', sizeof(address.sin_zero));
-    address.sin_family=AF_INET;
+    address.sin_family = AF_INET;
     address.sin_addr.s_addr = htonl(INADDR_ANY);
     address.sin_port = htons(8080);
     int bind_fd = bind(server_fd, (const struct sockaddr *) &address, sizeof(address));
@@ -27,15 +31,19 @@ int run(){
         perror("bind failed");
         exit(EXIT_FAILURE);
     }
+    printf("socket was bound\n");
 
-    if(listen(server_fd, 1000)<0){
+    if (listen(server_fd, 1000) < 0) {
         perror("listen failed");
         exit(EXIT_FAILURE);
     }
+    printf("listen to the socket\n");
 
     int connect_fd;
     while (1) {
-        if ((connect_fd = accept(server_fd, (struct sockaddr *) &address, (socklen_t *) sizeof(address)) < 0)) {
+        printf("listening to client connection\n");
+        int addrlen = sizeof(address);
+        if ((connect_fd = accept(server_fd, (struct sockaddr *) &address, (socklen_t *) &addrlen)) < 0) {
             perror("cannot accept socket connection");
             exit(EXIT_FAILURE);
         }
@@ -44,7 +52,7 @@ int run(){
         int valread = read(connect_fd, buffer, 1024);
         printf("%s\n", buffer);
         if (valread < 0) {
-            printf("no bytes in buffer to read");
+            printf("no bytes in buffer to read\n");
         }
         char *hello = "hello from server";
         write(connect_fd, hello, strlen(hello));
