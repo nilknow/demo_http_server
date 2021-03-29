@@ -54,7 +54,7 @@ int run() {
         if (valread < 0) {
             printf("no bytes in buffer to read\n");
         }
-        char *hello = "hello from server";
+        char *hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 17\n\nhello from server";
         write(connect_fd, hello, strlen(hello));
         close(connect_fd);
     }
